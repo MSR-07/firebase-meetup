@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
-import { addDoc, collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+} from "firebase/firestore";
 
 const Guestbook = ({ user, db }) => {
   useEffect(() => {
@@ -33,7 +39,7 @@ const Guestbook = ({ user, db }) => {
   };
 
   return (
-    <section id="guestbook-container">
+    <>
       <h2>Discussion</h2>
       <form id="leave-message" onSubmit={handleSubmit}>
         <label>Leave a message: </label>
@@ -43,8 +49,7 @@ const Guestbook = ({ user, db }) => {
           <span>SEND</span>
         </button>
       </form>
-      <section id="guestbook"></section>
-    </section>
+    </>
   );
 };
 

@@ -57,7 +57,10 @@ body {
   font-family: "Open Sans", sans-serif;
 }
 
-h1, h2, h3, p {
+h1,
+h2,
+h3,
+p {
   font-family: "Roboto", sans-serif;
   font-weight: normal;
 }
@@ -87,7 +90,7 @@ p {
 
 input {
   border: none;
-  border-bottom: 1px solid rgba(0,0,0,.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   font-size: 14px;
   padding: 4px 0;
   background: 0 0;
@@ -102,7 +105,8 @@ button.clicked {
   outline-color: rgb(60, 67, 154);
 }
 
-button, button.firebaseui-id-submit.mdl-button--raised.mdl-button--colored {
+button,
+button.firebaseui-id-submit.mdl-button--raised.mdl-button--colored {
   align-items: center;
   background-color: rgba(0, 0, 0, 0);
   border-color: rgb(60, 67, 154);
