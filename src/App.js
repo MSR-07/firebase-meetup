@@ -1,9 +1,24 @@
-import React, { useEffect, useState, useRef } from 'react';
-import './App.css';
-import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider } from 'firebase/auth';
-import { collection, addDoc, query, orderBy, onSnapshot, setDoc, doc, where } from 'firebase/firestore';
-import * as firebaseui from 'firebaseui';
-import { db } from './firebaseConfig';
+import React, { useEffect, useState, useRef } from "react";
+import "./App.css";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut,
+  EmailAuthProvider,
+} from "firebase/auth";
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  setDoc,
+  doc,
+  where,
+} from "firebase/firestore";
+import * as firebaseui from "firebaseui";
+import { db } from "./firebaseConfig";
+import Guestbook from "./components/Guestbook";
 
 const App = () => {
   const auth = getAuth();
@@ -44,7 +59,7 @@ const App = () => {
   }, [auth]);
 
   const subscribeGuestbook = () => {
-    const q = query(collection(db, 'guestbook'), orderBy('timestamp', 'desc'));
+    const q = query(collection(db, "guestbook"), orderBy("timestamp", "desc"));
     guestbookUnsubscribe.current = onSnapshot(q, (snapshot) => {
       setGuestbook(snapshot.docs.map((doc) => doc.data()));
     });
@@ -61,11 +76,19 @@ const App = () => {
     const ref = doc(db, 'attendees', user.uid);
     currentRSVPUnsubscribe.current = onSnapshot(ref, (doc) => {
       if (doc.exists) {
-        const attendingResponse = doc.data().attending;
-        setAttending(attendingResponse);
+        const data = doc.data();
+        if (data && data.attending !== undefined) {
+          const attendingResponse = data.attending;
+          setAttending(attendingResponse);
+          // Update UI based on the attendingResponse
+        } else {
+          console.error('Document data or attending field is undefined.');
+        }
+      } else {
+        console.error('Document does not exist.');
       }
     });
-
+  
     const attendingQuery = query(
       collection(db, 'attendees'),
       where('attending', '==', true)
@@ -74,6 +97,7 @@ const App = () => {
       setAttendingCount(snap.docs.length);
     });
   };
+  
 
   const unsubscribeCurrentRSVP = () => {
     if (currentRSVPUnsubscribe.current) {
@@ -87,12 +111,12 @@ const App = () => {
   };
 
   const handleRSVPYes = async () => {
-    const userRef = doc(db, 'attendees', auth.currentUser.uid);
+    const userRef = doc(db, "attendees", auth.currentUser.uid);
     await setDoc(userRef, { attending: true });
   };
 
   const handleRSVPNo = async () => {
-    const userRef = doc(db, 'attendees', auth.currentUser.uid);
+    const userRef = doc(db, "attendees", auth.currentUser.uid);
     await setDoc(userRef, { attending: false });
   };
 
@@ -100,7 +124,7 @@ const App = () => {
     if (auth.currentUser) {
       signOut(auth);
     } else {
-      ui.start('#firebaseui-auth-container', {
+      ui.start("#firebaseui-auth-container", {
         signInOptions: [EmailAuthProvider.PROVIDER_ID],
         callbacks: {
           signInSuccessWithAuthResult: () => false,
@@ -112,13 +136,13 @@ const App = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const input = e.target.elements.message;
-    await addDoc(collection(db, 'guestbook'), {
+    await addDoc(collection(db, "guestbook"), {
       text: input.value,
       timestamp: Date.now(),
       name: auth.currentUser.displayName,
       userId: auth.currentUser.uid,
     });
-    input.value = '';
+    input.value = "";
   };
 
   return (
@@ -129,10 +153,14 @@ const App = () => {
       />
       <section id="event-details-container">
         <h1>Firebase Meetup</h1>
-        <p><i className="material-icons">calendar_today</i> October 30</p>
-        <p><i className="material-icons">location_city</i> Faisalabad</p>
+        <p>
+          <i className="material-icons">calendar_today</i> October 30
+        </p>
+        <p>
+          <i className="material-icons">location_city</i> Faisalabad
+        </p>
         <button id="startRsvp" onClick={handleRSVPButton}>
-          {user ? 'LOGOUT' : 'RSVP'}
+          {user ? "LOGOUT" : "RSVP"}
         </button>
       </section>
       <hr />
@@ -145,20 +173,26 @@ const App = () => {
       {user && (
         <section id="guestbook-container">
           <h2>Are you attending?</h2>
-          <button id="rsvp-yes" onClick={handleRSVPYes} className={attending ? 'clicked' : ''}>YES</button>
-          <button id="rsvp-no" onClick={handleRSVPNo} className={attending === false ? 'clicked' : ''}>NO</button>
-          <h2>Discussion</h2>
-          <form id="leave-message" onSubmit={handleFormSubmit}>
-            <label>Leave a message: </label>
-            <input type="text" id="message" />
-            <button type="submit">
-              <i className="material-icons">send</i>
-              <span>SEND</span>
-            </button>
-          </form>
+          <button
+            id="rsvp-yes"
+            onClick={handleRSVPYes}
+            className={attending ? "clicked" : ""}
+          >
+            YES
+          </button>
+          <button
+            id="rsvp-no"
+            onClick={handleRSVPNo}
+            className={attending === false ? "clicked" : ""}
+          >
+            NO
+          </button>
+          <Guestbook user={user} db={db} />
           <section id="guestbook">
             {guestbook.map((entry, index) => (
-              <p key={index}>{entry.name}: {entry.text}</p>
+              <p key={index}>
+                {entry.name}: {entry.text}
+              </p>
             ))}
           </section>
         </section>
